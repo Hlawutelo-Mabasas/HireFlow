@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard - HireFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .dashboard-header { padding: 25px 40px; background: #1a1a2e; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #d4af37; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .logout-btn { background: #dc3545; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <a href="../index.html" class="navbar-brand">
+            <span class="brand-icon">&#9670;</span>
+            <span class="brand-name">Hire<span>Flow</span></span>
+        </a>
+    </header>
+    <div class="dashboard-header">
+        <h1>Company Dashboard</h1>
+        <div class="user-info">
+            <div class="user-avatar" id="userInitial">C</div>
+            <div>
+                <div id="userName" style="font-weight: 600;">Company</div>
+                <div style="font-size: 12px; color: #ccc;" id="userEmail">company@example.com</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" onclick="showSection('jobs')">My Jobs</a></li>
+                <li><a href="#" onclick="showSection('post-job')">Post New Job</a></li>
+                <li><a href="#" onclick="showSection('applications')">Applications</a></li>
+                <li><a href="#" onclick="showSection('subscription')">Subscription</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <div id="alertBox" class="alert"></div>
+            <section id="jobs" class="section-content">
+                <h2 class="section-title">My Job Postings</h2>
+                <p class="section-subtitle">Manage all your open job positions</p>
+                <div id="jobsList" style="margin-top: 30px;"></div>
+            </section>
+            <section id="post-job" class="section-content" style="display:none;">
+                <h2 class="section-title">Post a New Job</h2>
+                <div class="form-container" style="max-width: 600px;">
+                    <div class="form-group">
+                        <label for="jobTitle">Job Title</label>
+                        <input type="text" id="jobTitle" placeholder="e.g., Senior Developer">
+                    </div>
+                    <div class="form-group">
+                        <label for="jobLocation">Location</label>
+                        <input type="text" id="jobLocation" placeholder="e.g., New York, NY">
+                    </div>
+                    <div class="form-group">
+                        <label for="jobSalary">Salary Range</label>
+                        <input type="text" id="jobSalary" placeholder="e.g., $80k - $120k">
+                    </div>
+                    <div class="form-group">
+                        <label for="jobDescription">Job Description</label>
+                        <textarea id="jobDescription" placeholder="Describe the role..."></textarea>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%;" onclick="postNewJob()">Post Job</button>
+                </div>
+            </section>
+            <section id="applications" class="section-content" style="display:none;">
+                <h2 class="section-title">Applications</h2>
+                <p class="section-subtitle">Review and manage candidate applications</p>
+                <div id="applicationsList" style="margin-top: 30px;"></div>
+            </section>
+            <section id="subscription" class="section-content" style="display:none;">
+                <h2 class="section-title">Your Subscription</h2>
+                <div class="card" style="max-width: 500px;">
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: #888; font-size: 14px;">Current Plan</p>
+                        <h3 id="planName" style="font-size: 24px; color: #d4af37;">FREE</h3>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: #888; font-size: 14px;">Jobs Posted</p>
+                        <p id="jobsCount" style="font-size: 18px; font-weight: 600;">0 / 3</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <p style="color: #888; font-size: 14px;">Expires</p>
+                        <p id="expiryDate" style="font-size: 16px;">-</p>
+                    </div>
+                    <button class="btn btn-primary" style="width:100%;" onclick="upgradePlan()">Upgrade to PRO</button>
+                </div>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2024 <span>HireFlow</span> Recruitment SaaS Platform. Built with Spring Boot and PostgreSQL.</p>
+    </footer>
+    <script src="../js/api.js"></script>
+    <script>
+        let currentUser = null;
+        function init() {
+            currentUser = redirectIfNotLoggedIn();
+            if (currentUser.role !== "COMPANY") {
+                window.location.href = "login.html";
+            }
+            document.getElementById("userName").textContent = currentUser.name;
+            document.getElementById("userEmail").textContent = currentUser.email;
+            document.getElementById("userInitial").textContent = currentUser.name.charAt(0).toUpperCase();
+            loadJobs();
+            loadSubscription();
+        }
+        function showSection(section) {
+            document.querySelectorAll(".section-content").forEach(el => el.style.display = "none");
+            document.getElementById(section).style.display = "block";
+            document.querySelectorAll(".sidebar-menu a").forEach(el => el.classList.remove("active"));
+            event.target.closest("a").classList.add("active");
+            if (section === "applications") loadApplications();
+        }
+        async function loadJobs() {
+            try {
+                const jobs = await getJobsByCompany(currentUser.userId);
+                const container = document.getElementById("jobsList");
+                if (!jobs || jobs.length === 0) {
+                    container.innerHTML = '<p style="color: #888; text-align: center; padding: 40px;">No jobs posted yet.</p>';
+                    return;
+                }
+                let html = '';
+                jobs.forEach(job => {
+                    html += `<div class="card" style="margin-bottom: 20px;"><h3>${job.title}</h3><p style="color: #888; font-size: 14px;">Location: ${job.location || 'TBD'} | Salary: ${job.salary || 'TBD'}</p><p>${job.description || 'No description'}</p><div style="display: flex; gap: 10px; margin-top: 15px;"><button class="btn btn-blue btn-sm" onclick="viewApplications(${job.id})">View Applications</button><button class="btn btn-danger btn-sm" onclick="handleCloseJob(${job.id})">Close Job</button></div></div>`;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                document.getElementById("jobsList").innerHTML = '<p style="color: #888;">Error loading jobs.</p>';
+            }
+        }
+        async function postNewJob() {
+            const title = document.getElementById("jobTitle").value.trim();
+            const location = document.getElementById("jobLocation").value.trim();
+            const salary = document.getElementById("jobSalary").value.trim();
+            const description = document.getElementById("jobDescription").value.trim();
+            if (!title || !description) {
+                showAlert("alertBox", "Please fill in all required fields.", "error");
+                return;
+            }
+            try {
+                const result = await postJob(currentUser.userId, title, description, location, salary);
+                if (result.error) {
+                    showAlert("alertBox", result.error, "error");
+                } else {
+                    showAlert("alertBox", "Job posted successfully!", "success");
+                    document.getElementById("jobTitle").value = "";
+                    document.getElementById("jobLocation").value = "";
+                    document.getElementById("jobSalary").value = "";
+                    document.getElementById("jobDescription").value = "";
+                    setTimeout(() => { loadJobs(); showSection("jobs"); }, 1500);
+                }
+            } catch (error) {
+                showAlert("alertBox", "Error posting job.", "error");
+            }
+        }
+        async function loadApplications() {
+            try {
+                const jobs = await getJobsByCompany(currentUser.userId);
+                const container = document.getElementById("applicationsList");
+                if (!jobs || jobs.length === 0) {
+                    container.innerHTML = '<p style="color: #888;">No jobs posted yet.</p>';
+                    return;
+                }
+                let html = '<div class="table-container"><table><thead><tr><th>Job</th><th>Candidate</th><th>Status</th><th>Applied</th><th>Action</th></tr></thead><tbody>';
+                let hasApps = false;
+                for (const job of jobs) {
+                    const apps = await getApplicationsByJob(job.id);
+                    if (apps && apps.length > 0) {
+                        hasApps = true;
+                        apps.forEach(app => {
+                            const statusClass = `status-${app.status.toLowerCase()}`;
+                            html += `<tr><td>${job.title}</td><td>${app.candidate.name}</td><td><span class="${statusClass}">${app.status}</span></td><td>${new Date(app.appliedAt).toLocaleDateString()}</td><td><button class="btn btn-blue btn-sm" onclick="updateAppStatus(${app.id})">Update</button></td></tr>`;
+                        });
+                    }
+                }
+                html += '</tbody></table></div>';
+                container.innerHTML = hasApps ? html : '<p style="color: #888;">No applications yet.</p>';
+            } catch (error) {
+                document.getElementById("applicationsList").innerHTML = '<p style="color: #888;">Error loading applications.</p>';
+            }
+        }
+        async function loadSubscription() {
+            try {
+                const sub = await getSubscription(currentUser.userId);
+                const jobs = await getJobsByCompany(currentUser.userId);
+                if (sub) {
+                    document.getElementById("planName").textContent = sub.plan;
+                    document.getElementById("jobsCount").textContent = `${jobs.length} / ${sub.plan === 'PRO' ? 'Unlimited' : '3'}`;
+                    document.getElementById("expiryDate").textContent = sub.endDate || 'N/A';
+                }
+            } catch (error) {}
+        }
+        async function handleCloseJob(jobId) {
+            if (confirm("Are you sure you want to close this job?")) {
+                try {
+                    await closeJob(jobId);
+                    showAlert("alertBox", "Job closed successfully.", "success");
+                    loadJobs();
+                } catch (error) {
+                    showAlert("alertBox", "Error closing job.", "error");
+                }
+            }
+        }
+        function viewApplications(jobId) { showSection("applications"); }
+        function updateAppStatus(appId) {
+            const newStatus = prompt("Enter status (APPLIED, SHORTLISTED, INTERVIEW, HIRED, REJECTED):");
+            if (newStatus) {
+                updateApplicationStatus(appId, newStatus.toUpperCase()).then(() => { loadApplications(); });
+            }
+        }
+        async function upgradePlan() {
+            if (confirm("Upgrade to PRO plan for unlimited job postings?")) {
+                try {
+                    await upgradeToPro(currentUser.userId);
+                    showAlert("alertBox", "Upgraded to PRO successfully!", "success");
+                    loadSubscription();
+                } catch (error) {
+                    showAlert("alertBox", "Error upgrading plan.", "error");
+                }
+            }
+        }
+        function logout() { clearSession(); window.location.href = "login.html"; }
+        init();
+    </script>
+</body>
+</html>

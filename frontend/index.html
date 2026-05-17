@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HireFlow - Recruitment SaaS Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .features-section { padding: 70px 40px; background-color: #f8f8f8; }
+        .how-it-works { padding: 70px 40px; background-color: #fff; }
+        .how-steps { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; margin-top: 40px; }
+        .step { text-align: center; max-width: 220px; }
+        .step-number { width: 50px; height: 50px; background-color: #d4af37; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 800; margin: 0 auto 15px; }
+        .step h4 { font-size: 17px; color: #333; margin-bottom: 8px; }
+        .step p { font-size: 13px; color: #888; line-height: 1.6; }
+        .cta-section { background: linear-gradient(135deg, #1a1a2e, #0f3460); padding: 70px 40px; text-align: center; color: #fff; }
+        .cta-section h2 { font-size: 36px; font-weight: 800; margin-bottom: 15px; }
+        .cta-section p { font-size: 16px; color: #ccc; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <a href="index.html" class="navbar-brand">
+            <span class="brand-icon">&#9670;</span>
+            <span class="brand-name">Hire<span>Flow</span></span>
+        </a>
+        <nav class="navbar-links">
+            <a href="pages/jobs.html" class="nav-item">Browse Jobs</a>
+            <a href="pages/pricing.html" class="nav-item">Pricing</a>
+            <div class="nav-separator"></div>
+            <a href="pages/login.html" class="nav-item">Login</a>
+            <a href="pages/register.html" class="nav-item btn-nav-primary">Get Started</a>
+        </nav>
+    </header>
+    <section class="hero">
+        <h1>Find Talent. <span>Get Hired.</span></h1>
+        <p>HireFlow connects companies with top candidates through a smart, streamlined recruitment pipeline from job posting to final offer.</p>
+        <div class="hero-buttons">
+            <a href="pages/register.html?role=COMPANY" class="btn btn-primary">Post a Job</a>
+            <a href="pages/jobs.html" class="btn btn-secondary">Browse Jobs</a>
+        </div>
+    </section>
+    <section class="features-section">
+        <div style="text-align:center; margin-bottom: 40px;">
+            <h2 class="section-title">Everything You Need to Hire Smarter</h2>
+            <p class="section-subtitle">Built for companies of all sizes from startups to enterprises.</p>
+        </div>
+        <div class="cards-grid" style="justify-content: center;">
+            <div class="card">
+                <h3>Job Posting</h3>
+                <p>Post jobs in seconds. Reach thousands of qualified candidates instantly with detailed job descriptions.</p>
+                <a href="pages/register.html?role=COMPANY" class="card-link">Post a Job &rarr;</a>
+            </div>
+            <div class="card">
+                <h3>Application Pipeline</h3>
+                <p>Track every candidate through Applied, Shortlisted, Interview, Hired, or Rejected all in one dashboard.</p>
+                <a href="pages/login.html" class="card-link">View Pipeline &rarr;</a>
+            </div>
+            <div class="card">
+                <h3>Subscription Plans</h3>
+                <p>Start free with up to 3 job posts. Upgrade to PRO for unlimited postings and premium features.</p>
+                <a href="pages/pricing.html" class="card-link">See Pricing &rarr;</a>
+            </div>
+            <div class="card">
+                <h3>Candidate Profiles</h3>
+                <p>Candidates apply with cover letters. HR teams review, shortlist, and schedule interviews seamlessly.</p>
+                <a href="pages/register.html?role=CANDIDATE" class="card-link">Join as Candidate &rarr;</a>
+            </div>
+            <div class="card">
+                <h3>Admin Dashboard</h3>
+                <p>Full system control manage all companies, jobs, candidates, and subscriptions from one place.</p>
+                <a href="pages/login.html" class="card-link">Admin Login &rarr;</a>
+            </div>
+            <div class="card">
+                <h3>Role-Based Access</h3>
+                <p>Three distinct roles: Admin, Company, and Candidate each with their own secure dashboard.</p>
+                <a href="pages/register.html" class="card-link">Get Started &rarr;</a>
+            </div>
+        </div>
+    </section>
+    <section class="how-it-works">
+        <div style="text-align:center;">
+            <h2 class="section-title">How HireFlow Works</h2>
+            <p class="section-subtitle">Three simple steps to your next great hire.</p>
+        </div>
+        <div class="how-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h4>Company Posts a Job</h4>
+                <p>Register as a company, choose your plan, and post your job opening with full details.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h4>Candidates Apply</h4>
+                <p>Candidates browse open jobs and submit applications with their cover letters.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h4>HR Manages Pipeline</h4>
+                <p>Move candidates through the pipeline: Shortlist, Interview, then Hire or Reject.</p>
+            </div>
+        </div>
+    </section>
+    <section class="cta-section">
+        <h2>Ready to Build Your Team?</h2>
+        <p>Join hundreds of companies using HireFlow to find the best talent faster.</p>
+        <a href="pages/register.html?role=COMPANY" class="btn btn-primary">Start Hiring Today</a>
+    </section>
+    <footer>
+        <p>&copy; 2024 <span>HireFlow</span> Recruitment SaaS Platform. Built with Spring Boot and PostgreSQL.</p>
+    </footer>
+</body>
+</html>

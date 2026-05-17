@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - HireFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .pricing-header { padding: 60px 40px; background: linear-gradient(135deg, #1a1a2e, #0f3460); color: #fff; text-align: center; }
+        .pricing-header h1 { font-size: 36px; margin-bottom: 15px; }
+        .pricing-container { padding: 60px 40px; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <a href="../index.html" class="navbar-brand">
+            <span class="brand-icon">&#9670;</span>
+            <span class="brand-name">Hire<span>Flow</span></span>
+        </a>
+        <nav class="navbar-links">
+            <a href="../index.html" class="nav-item">Home</a>
+            <a href="jobs.html" class="nav-item">Browse Jobs</a>
+            <div class="nav-separator"></div>
+            <a href="login.html" class="nav-item">Login</a>
+            <a href="register.html" class="nav-item btn-nav-primary">Get Started</a>
+        </nav>
+    </header>
+    <div class="pricing-header">
+        <h1>Simple, Transparent Pricing</h1>
+        <p>Choose the plan that fits your hiring needs</p>
+    </div>
+    <div class="pricing-container">
+        <div id="alertBox" class="alert"></div>
+        <div class="plan-cards">
+            <div class="plan-card">
+                <div class="plan-name">FREE</div>
+                <div class="plan-price">R0<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>Up to 3 job postings</li>
+                    <li>Basic candidate filtering</li>
+                    <li>Email support</li>
+                    <li>1 month trial</li>
+                </ul>
+                <button class="btn btn-blue" style="width: 100%;" onclick="selectPlan('FREE')">Get Started</button>
+            </div>
+            <div class="plan-card featured">
+                <div class="plan-name">PRO</div>
+                <div class="plan-price">R99<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>Unlimited job postings</li>
+                    <li>Advanced candidate filtering</li>
+                    <li>Priority support</li>
+                    <li>Analytics dashboard</li>
+                    <li>Team collaboration</li>
+                    <li>Custom branding</li>
+                </ul>
+                <button class="btn btn-primary" style="width: 100%;" onclick="selectPlan('PRO')">Upgrade to PRO</button>
+            </div>
+            <div class="plan-card">
+                <div class="plan-name">ENTERPRISE</div>
+                <div class="plan-price">Custom<span>/month</span></div>
+                <ul class="plan-features">
+                    <li>Everything in PRO</li>
+                    <li>Dedicated account manager</li>
+                    <li>Custom integrations</li>
+                    <li>API access</li>
+                    <li>SLA guarantee</li>
+                </ul>
+                <button class="btn btn-blue" style="width: 100%;" onclick="selectPlan('ENTERPRISE')">Contact Sales</button>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2024 <span>HireFlow</span></p>
+    </footer>
+    <script src="../js/api.js"></script>
+    <script>
+        async function selectPlan(plan) {
+            const user = getSession();
+            if (!user) {
+                window.location.href = `register.html?role=COMPANY&plan=${plan}`;
+                return;
+            }
+            if (user.role !== 'COMPANY') {
+                showAlert('alertBox', 'Only company accounts can manage subscriptions.', 'error');
+                return;
+            }
+            if (plan === 'ENTERPRISE') {
+                alert('Please contact our sales team at sales@hireflow.com for Enterprise custom quotes.');
+                return;
+            }
+            if (plan === 'PRO') {
+                const confirmUpgrade = confirm('Upgrade to PRO plan for $99/month?');
+                if (confirmUpgrade) {
+                    try {
+                        const result = await upgradeToPro(user.userId);
+                        if (result.error) {
+                            showAlert('alertBox', result.error, 'error');
+                        } else {
+                            showAlert('alertBox', 'Successfully upgraded to PRO!', 'success');
+                            setTimeout(() => { window.location.href = 'company-dashboard.html'; }, 1500);
+                        }
+                    } catch (e) {
+                        showAlert('alertBox', 'Error connecting to server.', 'error');
+                    }
+                }
+            } else {
+                window.location.href = 'company-dashboard.html';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - HireFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        body { display: flex; flex-direction: column; min-height: 100vh; }
+        .page-center { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+        .form-container { width: 100%; }
+        .logo-link { text-align: center; margin-bottom: 25px; }
+        .logo-link a { text-decoration: none; font-size: 24px; font-weight: 800; color: #333; }
+        .logo-link a span { color: #d4af37; }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <a href="../index.html" class="navbar-brand">
+            <span class="brand-icon">&#9670;</span>
+            <span class="brand-name">Hire<span>Flow</span></span>
+        </a>
+        <nav class="navbar-links">
+            <a href="../pages/register.html" class="nav-item btn-nav-primary">Create Account</a>
+        </nav>
+    </header>
+
+    <div class="page-center">
+        <div class="form-container">
+            <div class="logo-link"><a href="../index.html">Hire<span>Flow</span></a></div>
+            <h2>Welcome Back</h2>
+            <p class="form-subtitle">Login to your HireFlow account</p>
+
+            <div id="alertBox" class="alert"></div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Your password">
+            </div>
+
+            <button class="btn btn-primary" style="width:100%;" onclick="handleLogin()">Login</button>
+
+            <div class="form-footer">
+                Don't have an account? <a href="register.html">Register here</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 <span>HireFlow</span></p>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script>
+        // If already logged in, redirect
+        const existing = getSession();
+        if (existing) redirectToDashboard(existing.role);
+
+        async function handleLogin() {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!email || !password) {
+                showAlert("alertBox", "Please fill in all fields.", "error");
+                return;
+            }
+
+            const result = await loginUser(email, password);
+
+            if (result.error) {
+                showAlert("alertBox", result.error, "error");
+            } else {
+                saveSession(result);
+                redirectToDashboard(result.role);
+            }
+        }
+
+        function redirectToDashboard(role) {
+            if (role === "ADMIN") window.location.href = "admin-dashboard.html";
+            else if (role === "COMPANY") window.location.href = "company-dashboard.html";
+            else if (role === "CANDIDATE") window.location.href = "candidate-dashboard.html";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - HireFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .dashboard-header { padding: 25px 40px; background: #1a1a2e; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: #d4af37; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .logout-btn { background: #dc3545; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <a href="../index.html" class="navbar-brand">
+            <span class="brand-icon">&#9670;</span>
+            <span class="brand-name">Hire<span>Flow</span></span>
+        </a>
+    </header>
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <div class="user-info">
+            <div class="user-avatar">A</div>
+            <div>
+                <div style="font-weight: 600;">Admin</div>
+                <div style="font-size: 12px; color: #ccc;">System Administrator</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active" onclick="showSection('overview')">Overview</a></li>
+                <li><a href="#" onclick="showSection('companies')">Companies</a></li>
+                <li><a href="#" onclick="showSection('candidates')">Candidates</a></li>
+                <li><a href="#" onclick="showSection('jobs')">All Jobs</a></li>
+                <li><a href="#" onclick="showSection('applications')">Applications</a></li>
+                <li><a href="#" onclick="showSection('subscriptions')">Subscriptions</a></li>
+            </ul>
+        </aside>
+        <main class="main-content">
+            <div id="alertBox" class="alert"></div>
+            <section id="overview" class="section-content">
+                <h2 class="section-title">System Overview</h2>
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalUsers">0</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCompanies">0</div>
+                        <div class="stat-label">Companies</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCandidates">0</div>
+                        <div class="stat-label">Candidates</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalJobs">0</div>
+                        <div class="stat-label">Job Postings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalApplications">0</div>
+                        <div class="stat-label">Applications</div>
+                    </div>
+                </div>
+            </section>
+            <section id="companies" class="section-content" style="display:none;">
+                <h2 class="section-title">All Companies</h2>
+                <div id="companiesList" style="margin-top: 30px;"></div>
+            </section>
+            <section id="candidates" class="section-content" style="display:none;">
+                <h2 class="section-title">All Candidates</h2>
+                <div id="candidatesList" style="margin-top: 30px;"></div>
+            </section>
+            <section id="jobs" class="section-content" style="display:none;">
+                <h2 class="section-title">All Job Postings</h2>
+                <div id="jobsList" style="margin-top: 30px;"></div>
+            </section>
+            <section id="applications" class="section-content" style="display:none;">
+                <h2 class="section-title">All Applications</h2>
+                <div id="applicationsList" style="margin-top: 30px;"></div>
+            </section>
+            <section id="subscriptions" class="section-content" style="display:none;">
+                <h2 class="section-title">Subscription Management</h2>
+                <div id="subscriptionsList" style="margin-top: 30px;"></div>
+            </section>
+        </main>
+    </div>
+    <footer>
+        <p>&copy; 2024 <span>HireFlow</span> Recruitment SaaS Platform. Built with Spring Boot and PostgreSQL.</p>
+    </footer>
+    <script src="../js/api.js"></script>
+    <script>
+        function init() {
+            const user = getSession();
+            if (!user || user.role !== "ADMIN") { window.location.href = "login.html"; }
+            loadOverview();
+        }
+        function showSection(section) {
+            document.querySelectorAll(".section-content").forEach(el => el.style.display = "none");
+            document.getElementById(section).style.display = "block";
+            document.querySelectorAll(".sidebar-menu a").forEach(el => el.classList.remove("active"));
+            event.target.closest("a").classList.add("active");
+            if (section === "companies") loadCompanies();
+            else if (section === "candidates") loadCandidates();
+            else if (section === "jobs") loadJobs();
+            else if (section === "applications") loadApplications();
+            else if (section === "subscriptions") loadSubscriptions();
+        }
+        async function loadOverview() {
+            try {
+                const users = await getAllUsers();
+                const companies = await getAllCompanies();
+                const candidates = await getAllCandidates();
+                const jobs = await getAllJobs();
+                const apps = await getAllApplications();
+                document.getElementById("totalUsers").textContent = users.length;
+                document.getElementById("totalCompanies").textContent = companies.length;
+                document.getElementById("totalCandidates").textContent = candidates.length;
+                document.getElementById("totalJobs").textContent = jobs.length;
+                document.getElementById("totalApplications").textContent = apps.length;
+            } catch (error) {}
+        }
+        async function loadCompanies() {
+            try {
+                const companies = await getAllCompanies();
+                const container = document.getElementById("companiesList");
+                if (!companies || companies.length === 0) { container.innerHTML = '<p>No companies registered.</p>'; return; }
+                let html = '<div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Action</th></tr></thead><tbody>';
+                companies.forEach(c => { html += `<tr><td>${c.name}</td><td>${c.email}</td><td>${c.companyName || '-'}</td><td><button class="btn btn-danger btn-sm" onclick="handleDeleteUser(${c.id})">Delete</button></td></tr>`; });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            } catch (error) {}
+        }
+        async function loadCandidates() {
+            try {
+                const candidates = await getAllCandidates();
+                const container = document.getElementById("candidatesList");
+                if (!candidates || candidates.length === 0) { container.innerHTML = '<p>No candidates registered.</p>'; return; }
+                let html = '<div class="table-container"><table><thead><tr><th>Name</th><th>Email</th><th>Action</th></tr></thead><tbody>';
+                candidates.forEach(c => { html += `<tr><td>${c.name}</td><td>${c.email}</td><td><button class="btn btn-danger btn-sm" onclick="handleDeleteUser(${c.id})">Delete</button></td></tr>`; });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            } catch (error) {}
+        }
+        async function loadJobs() {
+            try {
+                const jobs = await getAllJobs();
+                const container = document.getElementById("jobsList");
+                if (!jobs || jobs.length === 0) { container.innerHTML = '<p>No jobs posted.</p>'; return; }
+                let html = '<div class="table-container"><table><thead><tr><th>Title</th><th>Company</th><th>Status</th><th>Posted</th></tr></thead><tbody>';
+                jobs.forEach(j => { html += `<tr><td>${j.title}</td><td>${j.company.companyName}</td><td>${j.status}</td><td>${new Date(j.postedAt).toLocaleDateString()}</td></tr>`; });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            } catch (error) {}
+        }
+        async function loadApplications() {
+            try {
+                const apps = await getAllApplications();
+                const container = document.getElementById("applicationsList");
+                if (!apps || apps.length === 0) { container.innerHTML = '<p>No applications.</p>'; return; }
+                let html = '<div class="table-container"><table><thead><tr><th>Candidate</th><th>Job</th><th>Status</th><th>Applied</th></tr></thead><tbody>';
+                apps.forEach(a => {
+                    const statusClass = `status-${a.status.toLowerCase()}`;
+                    html += `<tr><td>${a.candidate.name}</td><td>${a.job.title}</td><td><span class="${statusClass}">${a.status}</span></td><td>${new Date(a.appliedAt).toLocaleDateString()}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            } catch (error) {}
+        }
+        async function loadSubscriptions() {
+            try {
+                const subs = await getAllSubscriptions();
+                const container = document.getElementById("subscriptionsList");
+                if (!subs || subs.length === 0) { container.innerHTML = '<p>No subscriptions.</p>'; return; }
+                let html = '<div class="table-container"><table><thead><tr><th>Company</th><th>Plan</th><th>Active</th><th>Expires</th></tr></thead><tbody>';
+                subs.forEach(s => { html += `<tr><td>${s.company.companyName}</td><td>${s.plan}</td><td>${s.active ? 'Yes' : 'No'}</td><td>${s.endDate || 'N/A'}</td></tr>`; });
+                html += '</tbody></table></div>';
+                container.innerHTML = html;
+            } catch (error) {}
+        }
+        async function handleDeleteUser(userId) {
+            if (confirm("Delete this user?")) {
+                try { await deleteUser(userId); loadOverview(); loadCompanies(); loadCandidates(); } catch (error) {}
+            }
+        }
+        function logout() { clearSession(); window.location.href = "login.html"; }
+        init();
+    </script>
+</body>
+</html>

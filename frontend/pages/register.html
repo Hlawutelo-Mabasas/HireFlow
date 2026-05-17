@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - HireFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="main-header">
+        <a href="../index.html" class="navbar-brand">
+            <span class="brand-icon">&#9670;</span>
+            <span class="brand-name">Hire<span>Flow</span></span>
+        </a>
+        <nav class="navbar-links">
+            <a href="login.html" class="nav-item">Login</a>
+        </nav>
+    </header>
+    <div style="padding: 60px 20px;">
+        <div class="form-container">
+            <h2>Create Account</h2>
+            <p class="form-subtitle">Join the HireFlow community today</p>
+            <div id="alertBox" class="alert"></div>
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" placeholder="Full Name">
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="name@example.com">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Create a password">
+            </div>
+            <div class="form-group">
+                <label for="role">Account Type</label>
+                <select id="role" onchange="toggleCompanyField()">
+                    <option value="CANDIDATE">Candidate (Looking for work)</option>
+                    <option value="COMPANY">Company (Hiring talent)</option>
+                </select>
+            </div>
+            <div class="form-group" id="companyField" style="display: none;">
+                <label for="companyName">Company Name</label>
+                <input type="text" id="companyName" placeholder="Acme Inc.">
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="handleRegister()">Create Account</button>
+            <div class="form-footer">
+                Already have an account? <a href="login.html">Login here</a>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2024 <span>HireFlow</span> Recruitment SaaS Platform. Built with Spring Boot and PostgreSQL.</p>
+    </footer>
+    <script src="../js/api.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const preRole = urlParams.get('role');
+        if (preRole) {
+            document.getElementById('role').value = preRole;
+            toggleCompanyField();
+        }
+        function toggleCompanyField() {
+            const role = document.getElementById("role").value;
+            document.getElementById("companyField").style.display = role === "COMPANY" ? "block" : "none";
+        }
+        async function handleRegister() {
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+            const role = document.getElementById("role").value;
+            const companyName = document.getElementById("companyName").value.trim();
+            if (!name || !email || !password) {
+                showAlert("alertBox", "Please fill in all required fields.", "error");
+                return;
+            }
+            try {
+                const result = await registerUser(name, email, password, role, companyName);
+                if (result.error) {
+                    showAlert("alertBox", result.error, "error");
+                } else {
+                    showAlert("alertBox", "Account created successfully! Redirecting to login...", "success");
+                    setTimeout(() => { window.location.href = "login.html"; }, 2000);
+                }
+            } catch (error) {
+                showAlert("alertBox", "Connection error. Please try again.", "error");
+            }
+        }
+    </script>
+</body>
+</html>
